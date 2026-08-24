@@ -77,6 +77,44 @@ dashboard and Supabase after changing the latter.
 - **`[analytics] enabled = false`** in `supabase/config.toml` — the Logflare and
   vector containers mount the Docker socket, which fails under Colima.
 
+## CORS: `ALLOWED_API_ORIGINS` is mandatory
+
+`apps/api/src/index.ts` does:
+
+```ts
+origin: process.env.ALLOWED_API_ORIGINS?.split(",") ?? []
+```
+
+Unset means an **empty allowlist** — every browser request from the dashboard to
+the API is blocked with a CORS error, which surfaces in the UI as vague failures
+like *"unable to create team"*. It's in `apps/api/.env-template` but easy to miss
+when assembling an env by hand, and `curl` testing won't catch it because curl
+ignores CORS.
+
+List every origin the dashboard is served from:
+
+```
+ALLOWED_API_ORIGINS=http://localhost:3001,http://127.0.0.1:3001,http://192.168.1.229:3001
+```
+
+## Missing database functions
+
+Six Postgres functions the app calls are defined **nowhere in this repo** — they
+exist only in Midday's hosted Supabase project, like `handle_new_user`:
+
+| Function | Called from | Effect when missing |
+|---|---|---|
+| `get_team_bank_accounts_balances` | `packages/db/src/queries/bank-accounts.ts:160` | Overview balance widgets never load |
+| `get_bank_account_currencies` | `packages/db/src/queries/bank-accounts.ts:172` | Currency selector empty |
+| `global_search` | `packages/db/src/queries/search.ts:95` | Top "Find anything" search errors |
+| `global_semantic_search` | `packages/db/src/queries/search.ts` | Semantic search errors (also needs embeddings) |
+| `match_similar_documents_by_title` | document matching | Inbox↔document matching degraded |
+| `get_assigned_users_for_project` | tracker projects | Assignee list on projects |
+
+The app is usable without them — invoicing, customers, transactions, tracker and
+vault all work — but the **overview widgets skeleton-load forever** and global
+search throws. They'd need to be written from scratch against the schema.
+
 ## ⚠️ Never `supabase stop --no-backup`
 
 `--no-backup` **discards the database volume**. The schema, your account, the
