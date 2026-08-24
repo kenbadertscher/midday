@@ -2,6 +2,15 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
+  // Next 16 blocks cross-origin requests to /_next/* dev resources by default.
+  // Without this, loading the dashboard over the LAN (e.g. http://192.168.x.x:3001)
+  // serves the server-rendered HTML but silently blocks webpack-hmr, so React
+  // never hydrates and nothing on the page is clickable.
+  // Dev-only setting; has no effect on production builds.
+  allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
