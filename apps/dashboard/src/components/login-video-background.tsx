@@ -3,6 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import LoginTestimonials from "./login-testimonials";
 
+// Upstream hardcoded a poster image and an MP4 on Midday's CDN (proxied via
+// midday.ai/cdn-cgi/image/...), so simply loading the login page fetched two
+// assets from Midday's servers. Both are decorative background media.
+//
+// Set NEXT_PUBLIC_LOGIN_POSTER_URL / NEXT_PUBLIC_LOGIN_VIDEO_URL to host your
+// own. Unset (the default) renders a plain background and skips the fetches.
+const LOGIN_POSTER_URL = process.env.NEXT_PUBLIC_LOGIN_POSTER_URL;
+const LOGIN_VIDEO_URL = process.env.NEXT_PUBLIC_LOGIN_VIDEO_URL;
+
 export function LoginVideoBackground() {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -50,12 +59,14 @@ export function LoginVideoBackground() {
           filter: isVideoLoaded ? "blur(0px)" : "blur(1px)",
         }}
       >
-        <img
-          src="https://midday.ai/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
-          alt=""
-          className="w-full h-full object-cover"
-          aria-hidden="true"
-        />
+        {LOGIN_POSTER_URL && (
+          <img
+            src={LOGIN_POSTER_URL}
+            alt=""
+            className="w-full h-full object-cover"
+            aria-hidden="true"
+          />
+        )}
       </div>
 
       {/* Video */}
@@ -69,12 +80,9 @@ export function LoginVideoBackground() {
         muted
         playsInline
         preload="auto"
-        poster="https://midday.ai/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
+        poster={LOGIN_POSTER_URL}
       >
-        <source
-          src="https://cdn.midday.ai/videos/login-video.mp4"
-          type="video/mp4"
-        />
+        {LOGIN_VIDEO_URL && <source src={LOGIN_VIDEO_URL} type="video/mp4" />}
       </video>
 
       {/* Overlay for better text readability */}

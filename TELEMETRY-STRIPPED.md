@@ -120,6 +120,32 @@ Three things static analysis missed, caught on the first boot of `apps/website`:
   so this is benign and was left alone — noted here so the `1e100.net`
   connections in a network capture aren't mistaken for a runtime beacon.
 
+### The image loader — biggest single finding
+
+`apps/dashboard/image-loader.ts` is registered in `next.config.ts` as
+`loader: "custom"`, so **every `<Image>` in the dashboard** passed through it —
+and it hardcoded `const CDN_URL = "https://midday.ai"`, rewriting each URL to
+`https://midday.ai/cdn-cgi/image/...` (Midday's Cloudflare image proxy),
+*unconditionally, including in local development*. Avatars, uploaded document
+previews and `/files/proxy` URLs were all routed through Midday's servers.
+
+This was missed by every earlier grep because the file sits at the app root
+rather than under `src/`, and it builds the host from a constant rather than
+naming it at the call site. It only surfaced when the login page was loaded and
+the served HTML was inspected.
+
+Both loaders (`apps/dashboard`, `apps/website`) are now driven by
+`NEXT_PUBLIC_CDN_URL`; unset means images are served straight from their origin
+with no proxy. Related: `login-video-background.tsx` hardcoded a poster image
+and an MP4 on Midday's CDN, so merely loading the login screen fetched two
+assets from them — now `NEXT_PUBLIC_LOGIN_POSTER_URL` /
+`NEXT_PUBLIC_LOGIN_VIDEO_URL`, and skipped entirely when unset. Dashboard OG
+metadata (`metadataBase`, `og:image`, `og:url`) was repointed too.
+
+**Verified:** the rendered `/login` page now makes **zero** external asset
+requests. The only remaining `midday.ai` strings are `<a href>` links
+(terms/policy), which require a click.
+
 ### Still reaching Midday's CDN on the marketing site
 
 `apps/website` is Midday's own advertising material and is welded to their asset

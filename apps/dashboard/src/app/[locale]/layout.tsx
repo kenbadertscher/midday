@@ -11,7 +11,7 @@ import { isDesktopApp } from "@/utils/desktop";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.midday.ai"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || "http://localhost:3001"),
   title: "Midday | Run your business smarter",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
@@ -21,12 +21,12 @@ export const metadata: Metadata = {
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
+        url: `${process.env.NEXT_PUBLIC_CDN_URL || ""}/opengraph-image-v1.jpg`,
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
+        url: `${process.env.NEXT_PUBLIC_CDN_URL || ""}/opengraph-image-v1.jpg`,
         width: 1800,
         height: 1600,
       },
@@ -36,16 +36,16 @@ export const metadata: Metadata = {
     title: "Midday | Run your business smarter",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.midday.ai",
+    url: process.env.NEXT_PUBLIC_URL || "http://localhost:3001",
     siteName: "Midday",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
+        url: `${process.env.NEXT_PUBLIC_CDN_URL || ""}/opengraph-image-v1.jpg`,
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
+        url: `${process.env.NEXT_PUBLIC_CDN_URL || ""}/opengraph-image-v1.jpg`,
         width: 1800,
         height: 1600,
       },
