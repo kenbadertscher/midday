@@ -7,6 +7,7 @@ import {
   scopePresets,
   scopesToName,
 } from "@api/utils/scopes";
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
@@ -20,7 +21,6 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod/v3";

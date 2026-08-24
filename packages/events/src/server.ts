@@ -1,21 +1,14 @@
-import { OpenPanel, type TrackProperties } from "@openpanel/nextjs";
+// Analytics stripped for self-hosting. See ./client.tsx for context.
+//
+// Upstream instantiated an OpenPanel client here and posted server-side events
+// to https://api.openpanel.dev from the auth callback and webhook routes.
+
+type TrackProperties = Record<string, unknown>;
 
 export const setupAnalytics = async () => {
-  const client = new OpenPanel({
-    clientId: process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!,
-    clientSecret: process.env.OPENPANEL_SECRET_KEY!,
-  });
-
   return {
-    track: (options: { event: string } & TrackProperties) => {
-      if (process.env.NODE_ENV !== "production") {
-        console.log("Track", options);
-        return;
-      }
-
-      const { event, ...rest } = options;
-
-      client.track(event, rest).catch(() => {});
+    track: (_options: { event: string } & TrackProperties) => {
+      // no-op
     },
   };
 };

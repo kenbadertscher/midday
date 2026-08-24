@@ -1,8 +1,8 @@
 "use client";
 
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Table, TableBody } from "@midday/ui/table";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useDeferredValue, useEffect } from "react";
 import { useInView } from "react-intersection-observer";

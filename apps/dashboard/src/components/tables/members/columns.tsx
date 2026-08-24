@@ -31,7 +31,7 @@ import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
 import { Loader2, MoreHorizontal } from "lucide-react";
 import { useI18n } from "@/locales/client";
 import "@tanstack/react-table";
-import { useOpenPanel } from "@openpanel/nextjs";
+import { useOpenPanel } from "@midday/events/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";

@@ -100,8 +100,8 @@ app.openapi(
     });
 
     const _dashboardUrl =
-      process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
-    const redirectUri = `${process.env.MIDDAY_API_URL || "https://api.midday.ai"}/invoice-payments/connect-stripe/callback`;
+      process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
+    const redirectUri = `${process.env.MIDDAY_API_URL || "http://localhost:3002"}/invoice-payments/connect-stripe/callback`;
 
     // Build Stripe Connect OAuth URL (Standard accounts)
     const params = new URLSearchParams({
@@ -183,7 +183,7 @@ app.openapi(
     const db = c.get("db");
     const { code, state, error, error_description } = c.req.valid("query");
     const dashboardUrl =
-      process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+      process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
 
     // Handle OAuth errors
     if (error || !code) {

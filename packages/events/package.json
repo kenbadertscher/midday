@@ -10,9 +10,6 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@openpanel/nextjs": "^1.4.0"
-  },
   "devDependencies": {
     "typescript": "catalog:"
   },

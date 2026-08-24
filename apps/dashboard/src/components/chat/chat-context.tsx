@@ -1,8 +1,8 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { DefaultChatTransport } from "ai";
 import type { ReactNode } from "react";
 import {

@@ -355,7 +355,13 @@ export const oauthApplicationsRouter = createTRPCRouter({
           const userTeams = await getTeamsByUserId(db, session.user.id);
           const currentTeam = userTeams?.find((team) => team.id === teamId);
 
-          if (currentTeam && session.user.email) {
+          // Upstream hardcoded `to: "pontus@midday.ai"` here, so submitting an
+          // OAuth app for review emailed your team name and account email to a
+          // Midday employee. Now routed to APP_REVIEW_EMAIL and skipped entirely
+          // when that isn't set.
+          const reviewEmail = process.env.APP_REVIEW_EMAIL;
+
+          if (reviewEmail && currentTeam && session.user.email) {
             const html = await render(
               AppReviewRequestEmail({
                 applicationName: application.name,
@@ -366,8 +372,8 @@ export const oauthApplicationsRouter = createTRPCRouter({
             );
 
             await resend.emails.send({
-              from: "Midday <middaybot@midday.ai>",
-              to: "pontus@midday.ai",
+              from: process.env.RESEND_FROM_EMAIL || "noreply@localhost",
+              to: reviewEmail,
               subject: `Application Review Request - ${application.name}`,
               html,
             });

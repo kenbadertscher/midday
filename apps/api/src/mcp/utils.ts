@@ -43,7 +43,7 @@ export function getDateContext(timezone: string | null): DateContext {
 }
 
 export const DASHBOARD_URL =
-  process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+  process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
 
 export const MCP_TEXT_LIMIT = 25_000;
 

@@ -1,9 +1,9 @@
 "use client";
 
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import { Suspense, useCallback } from "react";
 import { ChatProvider } from "@/components/chat/chat-context";

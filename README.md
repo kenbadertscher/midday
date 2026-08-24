@@ -12,11 +12,10 @@
   </p>
 </p>
 
-<p align="center">
-  <a href="https://go.midday.ai/K7GwMoQ">
-    <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-  </a>
-</p>
+> **Note:** This fork has had Midday's telemetry and phone-home paths removed —
+> OpenPanel analytics, the bank-logo CDN, the desktop auto-updater, the README
+> tracking pixel, and the hardcoded fallbacks to `*.midday.ai`. See
+> `TELEMETRY-STRIPPED.md` for the full list.
 
 ## About Midday
 
@@ -72,10 +71,6 @@ We are working on the documentation to get started with Midday for local develop
 - Typesense (Search)
 - Gemini
 - OpenAI
-
-## Repo Activity
-
-![Alt](https://repobeats.axiom.co/api/embed/96aae855e5dd87c30d53c1d154b37cf7aa5a89b3.svg "Repobeats analytics image")
 
 ## License
 

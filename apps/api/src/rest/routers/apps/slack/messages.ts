@@ -5,6 +5,11 @@ import {
 } from "@midday/app-store/slack/server";
 import { logger } from "@midday/logger";
 
+// Upstream hardcoded https://app.midday.ai in these Slack links, which sent
+// users to Midday's hosted dashboard instead of this deployment.
+const DASHBOARD_BASE_URL =
+  process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
+
 /**
  * Returns the welcome message content for Slack
  */
@@ -47,7 +52,7 @@ export function getWelcomeMessage(isPrivateChannel = false) {
           text: "⚙️ Notification Settings",
           emoji: true,
         },
-        url: "https://app.midday.ai/apps?app=slack&settings=true",
+        url: `${DASHBOARD_BASE_URL}/apps?app=slack&settings=true`,
         action_id: "view_settings",
       },
     ],

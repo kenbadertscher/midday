@@ -131,7 +131,7 @@ export function warmToolIndex(): void {
     userId: "warmup",
     userEmail: null,
     scopes: expandScopes(["apis.all"]) as McpContext["scopes"],
-    apiUrl: process.env.MIDDAY_API_URL ?? "https://api.midday.ai",
+    apiUrl: process.env.MIDDAY_API_URL ?? "http://localhost:3002",
     timezone: "UTC",
     locale: "en",
     countryCode: null,

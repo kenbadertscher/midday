@@ -2,6 +2,7 @@
 
 import { connectorApps } from "@midday/connectors";
 import type { ConnectorApp } from "@midday/connectors/types";
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -16,7 +17,6 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useOpenPanel } from "@openpanel/nextjs";
 import {
   useMutation,
   useQuery,

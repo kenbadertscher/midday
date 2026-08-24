@@ -17,26 +17,21 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
       style={{ width: size, height: size }}
       className={cn(!showingFallback && "border border-border")}
     >
-      {src && !hasError ? (
+      {src && !hasError && (
         <AvatarImage
           src={src}
           alt={alt}
           className="object-contain bg-white"
           onError={() => setHasError(true)}
         />
-      ) : (
-        <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
-          alt={alt}
-          className="object-contain"
-        />
       )}
-      <AvatarFallback>
-        <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
-          alt={alt}
-          className="object-contain"
-        />
+      {/*
+        Upstream pointed both the empty and error fallbacks at
+        https://cdn-engine.midday.ai/default.jpg. Rendered locally instead so a
+        missing logo doesn't leak the institution to a third-party CDN.
+      */}
+      <AvatarFallback className="text-[11px] font-medium uppercase">
+        {alt?.trim().charAt(0) || "?"}
       </AvatarFallback>
     </Avatar>
   );

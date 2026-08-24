@@ -238,7 +238,7 @@ async function handleIncomingMessage(
     userId: user.id,
     userEmail: user.email ?? null,
     scopes: ALL_ASSISTANT_SCOPES,
-    apiUrl: process.env.MIDDAY_API_URL || "https://api.midday.ai",
+    apiUrl: process.env.MIDDAY_API_URL || "http://localhost:3002",
     timezone: user.timezone ?? "UTC",
     locale: user.locale ?? "en",
     countryCode: user.team?.countryCode ?? null,
@@ -463,10 +463,15 @@ function resolveSendblueConversation(
       },
     }),
     afterConnect: async ({ thread: t }) => {
+      // Upstream sent a contact card hosted at cdn.midday.ai. Skipped unless
+      // BOT_CONTACT_CARD_URL points at a card you host yourself.
+      const contactCardUrl = process.env.BOT_CONTACT_CARD_URL;
+      if (!contactCardUrl) return;
+
       try {
         await (t.adapter as SendblueAdapter).sendMediaMessage(
           t.id,
-          "https://cdn.midday.ai/midday-contact.vcf",
+          contactCardUrl,
         );
       } catch {
         // Contact card is best-effort

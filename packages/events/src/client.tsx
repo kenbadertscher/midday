@@ -1,31 +1,32 @@
-import {
-  OpenPanelComponent,
-  type TrackProperties,
-  useOpenPanel,
-} from "@openpanel/nextjs";
+// Analytics stripped for self-hosting.
+//
+// Upstream wired this to OpenPanel (@openpanel/nextjs), which mounted a
+// <Script src="https://openpanel.dev/op1.js"> on every page — unconditionally,
+// regardless of whether a client ID was configured — and posted events to
+// https://api.openpanel.dev.
+//
+// The Provider and track() signatures are kept so the ~40 call sites that
+// import LogEvents and fire track() still compile. Both are now no-ops.
 
-const isProd = process.env.NODE_ENV === "production";
+type TrackProperties = Record<string, unknown>;
 
-const Provider = () => (
-  <OpenPanelComponent
-    clientId={process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!}
-    trackAttributes={true}
-    trackScreenViews={isProd}
-    trackOutgoingLinks={isProd}
-  />
-);
+const Provider = () => null;
 
-const track = (options: { event: string } & TrackProperties) => {
-  const { track: openTrack } = useOpenPanel();
-
-  if (!isProd) {
-    console.log("Track", options);
-    return;
-  }
-
-  const { event, ...rest } = options;
-
-  openTrack(event, rest);
+const track = (_options: { event: string } & TrackProperties) => {
+  // no-op
 };
 
-export { Provider, track };
+// Drop-in replacement for @openpanel/nextjs's useOpenPanel(). ~37 dashboard
+// components imported that hook directly rather than going through this
+// wrapper; they now import from here and their track() calls do nothing.
+const useOpenPanel = () => ({
+  track: (_event: string, _properties?: TrackProperties) => {
+    // no-op
+  },
+  clear: () => {
+    // no-op
+  },
+});
+
+export type { TrackProperties };
+export { Provider, track, useOpenPanel };

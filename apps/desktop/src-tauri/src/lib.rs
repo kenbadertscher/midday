@@ -6,7 +6,6 @@ use tauri::{
     WebviewWindowBuilder,
 };
 use tauri_plugin_deep_link::DeepLinkExt;
-use tauri_plugin_updater;
 use tauri_plugin_dialog;
 use tauri_plugin_process;
 use tauri::menu::{Menu, MenuItem};
@@ -38,49 +37,17 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     Ok(())
 }
 
-/// Prompt the user to download and install an update.
-/// Shared by both manual and silent update flows.
-#[cfg(desktop)]
-async fn prompt_and_install_update(app: &tauri::AppHandle, update: tauri_plugin_updater::Update) {
-    use tauri_plugin_dialog::{DialogExt, MessageDialogKind, MessageDialogButtons};
-
-    let answer = app.dialog()
-        .message(format!("A new version {} is available. Would you like to update now?", update.version))
-        .title("Update Available")
-        .kind(MessageDialogKind::Info)
-        .buttons(MessageDialogButtons::OkCancel)
-        .blocking_show();
-
-    if answer {
-        let _ = update.download_and_install(
-            |_chunk_length, _content_length| {},
-            || {
-                println!("Update download finished");
-            }
-        ).await;
-    }
-}
-
 /// Silent update check — only shows a dialog when an update is available.
 /// Used on startup and by the periodic background timer.
 #[cfg(desktop)]
-async fn silent_update_check(app: tauri::AppHandle) {
-    use tauri_plugin_updater::UpdaterExt;
-
-    if let Ok(updater) = app.updater() {
-        match updater.check().await {
-            Ok(Some(update)) => {
-                println!("Update available: {}", update.version);
-                prompt_and_install_update(&app, update).await;
-            }
-            Ok(None) => {
-                println!("No updates available");
-            }
-            Err(e) => {
-                println!("Silent update check failed: {}", e);
-            }
-        }
-    }
+async fn silent_update_check(_app: tauri::AppHandle) {
+    // Auto-update disabled for self-hosting.
+    //
+    // Upstream polled https://api.midday.ai/desktop/update on startup and every
+    // 4 hours, and would install any payload signed by Midday's minisign key
+    // (with dangerousInsecureTransportProtocol enabled). Both the endpoint and
+    // the key have been removed from tauri.conf.json; this is now a no-op.
+    println!("Auto-update disabled in this build");
 }
 
 /// Manual update check (triggered from tray menu).
@@ -88,43 +55,22 @@ async fn silent_update_check(app: tauri::AppHandle) {
 #[tauri::command]
 async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
     use tauri_plugin_dialog::{DialogExt, MessageDialogKind, MessageDialogButtons};
-    use tauri_plugin_updater::UpdaterExt;
-    
+
     #[cfg(desktop)]
     {
-        if let Ok(updater) = app.updater() {
-            match updater.check().await {
-                Ok(Some(update)) => {
-                    prompt_and_install_update(&app, update).await;
-                }
-                Ok(None) => {
-                    let version = app.package_info().version.to_string();
-                    app.dialog()
-                        .message(format!("Midday\nversion {}\n\nYou're up to date!", version))
-                        .title("No Updates Available")
-                        .kind(MessageDialogKind::Info)
-                        .buttons(MessageDialogButtons::Ok)
-                        .blocking_show();
-                }
-                Err(e) => {
-                    app.dialog()
-                        .message(format!("Failed to check for updates: {}", e))
-                        .title("Update Check Failed")
-                        .kind(MessageDialogKind::Error)
-                        .buttons(MessageDialogButtons::Ok)
-                        .blocking_show();
-                }
-            }
-        } else {
-            app.dialog()
-                .message("Update checking is not available in this build.")
-                .title("Updates Not Available")
-                .kind(MessageDialogKind::Warning)
-                .buttons(MessageDialogButtons::Ok)
-                .blocking_show();
-        }
+        // Auto-update disabled for self-hosting — see silent_update_check.
+        let version = app.package_info().version.to_string();
+        app.dialog()
+            .message(format!(
+                "Midday\nversion {}\n\nAuto-update is disabled in this build.",
+                version
+            ))
+            .title("Updates Not Available")
+            .kind(MessageDialogKind::Info)
+            .buttons(MessageDialogButtons::Ok)
+            .blocking_show();
     }
-    
+
     #[cfg(not(desktop))]
     {
         app.dialog()
@@ -333,39 +279,19 @@ async fn create_preloaded_search_window(
 }
 
 fn get_app_url() -> String {
-    // Try runtime environment variable first, then fall back to compile-time
-    let env = env::var("MIDDAY_ENV")
-        .unwrap_or_else(|_| {
-            option_env!("MIDDAY_ENV")
-                .unwrap_or("development")
-                .to_string()
-        });
+    // Upstream hardcoded https://app.midday.ai for release builds (and
+    // https://beta.midday.ai for staging), so the desktop shell always loaded
+    // Midday's hosted SaaS rather than a self-hosted dashboard.
+    //
+    // Point MIDDAY_APP_URL at your own instance instead. Defaults to the local
+    // dev dashboard; it never falls back to a Midday-operated host.
+    let url = env::var("MIDDAY_APP_URL")
+        .ok()
+        .or_else(|| option_env!("MIDDAY_APP_URL").map(|s| s.to_string()))
+        .unwrap_or_else(|| "http://localhost:3001".to_string());
 
-    println!("🌍 Environment detected: {}", env);
-
-    match env.as_str() {
-        "development" | "dev" => {
-            let url = "http://localhost:3001".to_string();
-            println!("🌍 Using development URL: {}", url);
-            url
-        },
-        "staging" => {
-            let url = "https://beta.midday.ai".to_string();
-            println!("🌍 Using staging URL: {}", url);
-            url
-        },
-        "production" | "prod" => {
-            let url = "https://app.midday.ai".to_string();
-            println!("🌍 Using production URL: {}", url);
-            url
-        },
-        _ => {
-            eprintln!("Unknown environment: {}, defaulting to development", env);
-            let url = "http://localhost:3001".to_string();
-            println!("🌍 Using fallback development URL: {}", url);
-            url
-        }
-    }
+    println!("🌍 Using app URL: {}", url);
+    url
 }
 
 fn is_external_url(url: &str, app_url: &str) -> bool {
@@ -421,9 +347,8 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![show_window, check_for_updates])
         .setup(move |app| {
-            // Add updater plugin conditionally for desktop
-            #[cfg(desktop)]
-            app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+            // Updater plugin not registered — auto-update is disabled for
+            // self-hosting (see silent_update_check).
 
             // Check for updates on startup (after a short delay) and every 4 hours
             #[cfg(desktop)]
