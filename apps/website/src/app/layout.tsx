@@ -116,8 +116,12 @@ export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://cdn.midday.ai" />
-        <link rel="dns-prefetch" href="https://cdn.midday.ai" />
+        {/*
+          Upstream preconnected + dns-prefetched https://cdn.midday.ai here.
+          A preconnect opens a real TCP+TLS connection to Midday's CDN on every
+          page load whether or not any asset from it is used, so both hints are
+          removed rather than repointed.
+        */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -102,7 +102,36 @@ Other specifics:
 - `packages/email` — 7 `go.midday.ai/*` click-tracking shortlinks (including the
   "Reconnect" CTAs in the connection-expiry emails) → configured app/website URL.
 
-## 5. README
+## 5. Found by actually running it
+
+Three things static analysis missed, caught on the first boot of `apps/website`:
+
+- **`<link rel="preconnect" href="https://cdn.midday.ai">`** (plus `dns-prefetch`)
+  in `apps/website/src/app/layout.tsx`. A preconnect opens a real TCP+TLS
+  connection to Midday's CDN on every page load whether or not any asset from it
+  is used. Both hints removed.
+- **Turborepo telemetry was enabled** and phoned home to Vercel during the dev
+  run — build-toolchain telemetry, entirely outside the application source I had
+  been grepping. Disabled via `turbo telemetry disable`. Note this is a
+  **global** setting (`~/Library/Application Support/turborepo/telemetry.json`),
+  not per-repo; re-enable with `turbo telemetry enable`.
+- **`next/font/google`** (both layouts) fetches the Hedvig font files from
+  Google at *build* time and self-hosts them. The browser never contacts Google,
+  so this is benign and was left alone — noted here so the `1e100.net`
+  connections in a network capture aren't mistaken for a runtime beacon.
+
+### Still reaching Midday's CDN on the marketing site
+
+`apps/website` is Midday's own advertising material and is welded to their asset
+hosts. Its homepage still pulls a hero poster from `cdn.midday.ai` via
+`<link rel="preload" as="image">`, and preloads **192 integration logos from
+`logos.composio.dev`**. Neither is telemetry — they're image CDNs — but both
+leak the visitor's IP to a third party.
+
+This was left as-is because the marketing site isn't needed to run Midday as an
+app. If you ever do serve it publicly, vendor those assets first.
+
+## 6. README
 
 Removed the **Repobeats tracking pixel** (`repobeats.axiom.co`) and the Supabase
 badge wrapped in a `go.midday.ai` referral redirect.
@@ -129,5 +158,13 @@ badge wrapped in a `go.midday.ai` referral redirect.
 `bun install` clean; `tsc --noEmit` passes for `apps/api`, `apps/dashboard`,
 `packages/{utils,events,banking,cli,email,app-store}`. `apps/website` has 16
 pre-existing type errors in files untouched here (both Next apps ship
-`typescript.ignoreBuildErrors: true`). Nothing was built or run end-to-end —
-this is a static change plus typecheck.
+`typescript.ignoreBuildErrors: true`).
+
+`apps/website` was booted and its served HTML inspected: no `openpanel`,
+`op1.js`, `rrweb`, `repobeats`, or `cdn-engine` references remain, and no
+preconnect to any Midday host. A network monitor (`netwatch.local/`, gitignored)
+watched all user-owned processes during the run — that's what caught the
+Turborepo telemetry.
+
+`apps/dashboard` has **not** been run: it needs a Supabase instance (auth +
+storage) that upstream never shipped a local setup for. See below.
