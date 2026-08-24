@@ -77,7 +77,24 @@ dashboard and Supabase after changing the latter.
 - **`[analytics] enabled = false`** in `supabase/config.toml` — the Logflare and
   vector containers mount the Docker socket, which fails under Colima.
 
+## ⚠️ Never `supabase stop --no-backup`
+
+`--no-backup` **discards the database volume**. The schema, your account, the
+storage buckets and the `handle_new_user` trigger all go with it. The symptom is
+confusing rather than obvious: login still *succeeds* (GoTrue keeps working),
+then every query fails and the app bounces you straight back to `/login`.
+
+Use plain `supabase stop`. If you do wipe it, run `./scripts/local-db-setup.sh`
+to rebuild.
+
 ## Rebuilding the database from scratch
+
+```bash
+./scripts/local-db-setup.sh           # create/refresh schema, keep data
+./scripts/local-db-setup.sh --reset   # drop public schema first
+```
+
+The script is idempotent and handles everything below. Manual equivalent:
 
 ```bash
 docker exec supabase_db_midday psql -U postgres -d postgres -c \
@@ -102,7 +119,7 @@ docker cp /tmp/mdgen/0000_full.sql supabase_db_midday:/tmp/full.sql
 docker exec supabase_db_midday psql -U postgres -d postgres -f /tmp/full.sql
 ```
 
-Then the two things upstream's hosted DB provides:
+Then the things upstream's hosted DB provides (the script does these too):
 
 ```sql
 ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_id_fkey;
