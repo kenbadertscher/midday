@@ -27,16 +27,23 @@ export function InvoiceNo() {
   const trpc = useTRPC();
   const { updateTemplate } = useTemplateUpdate();
 
-  const { invoiceType } = useInvoiceParams();
+  const { invoiceType, invoiceId } = useInvoiceParams();
 
   const { data } = useQuery(
     trpc.invoice.searchInvoiceNumber.queryOptions(
       {
         query: invoiceNumber,
+        // Editing: ignore this invoice's own row, or its current number always
+        // reads as a duplicate of itself.
+        excludeId: invoiceId ?? undefined,
       },
       {
-        // Only search for invoice number if we are creating a new invoice
-        enabled: invoiceType === "create" && invoiceNumber !== "",
+        // Checked while editing too — the number stays editable after an
+        // invoice exists (e.g. drafts created from the tracker), so the
+        // duplicate check has to follow it there.
+        enabled:
+          (invoiceType === "create" || invoiceType === "edit") &&
+          invoiceNumber !== "",
         // Never cache the result
         gcTime: 0,
       },

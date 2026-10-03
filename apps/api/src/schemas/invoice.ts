@@ -655,6 +655,8 @@ export const getInvoiceByIdSchema = z.object({
 
 export const searchInvoiceNumberSchema = z.object({
   query: z.string(),
+  // The invoice being edited, so it doesn't collide with its own number.
+  excludeId: z.string().uuid().optional(),
 });
 
 export const invoiceSummarySchema = z

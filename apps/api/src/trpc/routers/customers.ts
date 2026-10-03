@@ -14,6 +14,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@api/trpc/init";
+import { isEnrichmentEnabled } from "@api/utils/enrichment";
 import {
   clearCustomerEnrichment,
   deleteCustomer,
@@ -71,8 +72,12 @@ export const customersRouter = createTRPCRouter({
         userId: session.user.id,
       });
 
-      // Auto-trigger enrichment for new customers with a website or email
+      // Auto-trigger enrichment for new customers with a website or email.
+      // Skipped entirely when no CompanyEnrich key is configured — queueing a
+      // job that cannot enrich anything would strand the customer in the
+      // "Enriching" state. See @api/utils/enrichment.
       if (
+        isEnrichmentEnabled() &&
         isNewCustomer &&
         (customer?.website || customer?.email) &&
         customer?.id
@@ -121,6 +126,14 @@ export const customersRouter = createTRPCRouter({
   enrich: protectedProcedure
     .input(enrichCustomerSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
+      if (!isEnrichmentEnabled()) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message:
+            "Enrichment is not configured - COMPANY_ENRICH_API_KEY is not set",
+        });
+      }
+
       const customer = await getCustomerById(db, {
         id: input.id,
         teamId: teamId!,

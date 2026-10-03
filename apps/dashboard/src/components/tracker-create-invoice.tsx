@@ -106,6 +106,9 @@ export function TrackerCreateInvoice({ projectId }: Props) {
   const [date, setDate] = useState<DateRange | undefined>(
     defaultPresetOption?.dateRange,
   );
+  const [lineItemMode, setLineItemMode] = useState<"summary" | "itemized">(
+    "summary",
+  );
 
   const createInvoiceFromTrackerMutation = useMutation(
     trpc.invoice.createFromTracker.mutationOptions({
@@ -183,6 +186,7 @@ export function TrackerCreateInvoice({ projectId }: Props) {
       projectId,
       dateFrom: formatISO(date.from, { representation: "date" }),
       dateTo: formatISO(date.to, { representation: "date" }),
+      lineItemMode,
     });
   };
 
@@ -203,6 +207,25 @@ export function TrackerCreateInvoice({ projectId }: Props) {
                       {preset.label}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={lineItemMode}
+                onValueChange={(value) =>
+                  setLineItemMode(value as "summary" | "itemized")
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Line items" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="summary">
+                    Total hours as one line
+                  </SelectItem>
+                  <SelectItem value="itemized">
+                    One line per time entry
+                  </SelectItem>
                 </SelectContent>
               </Select>
 

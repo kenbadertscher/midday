@@ -1014,6 +1014,13 @@ export const invoices = pgTable(
       .on(table.invoiceRecurringId, table.recurringSequence)
       .where(sql`invoice_recurring_id IS NOT NULL`),
     unique("invoices_scheduled_job_id_key").on(table.scheduledJobId),
+    // Invoice numbers are user-editable, so two concurrent saves could both
+    // pass the API's availability check and persist the same number. Lowercased
+    // to match that check, which is case-insensitive. Partial: a draft may not
+    // have a number yet, and NULLs must not collide.
+    uniqueIndex("invoices_team_invoice_number_unique_idx")
+      .on(table.teamId, sql`lower(${table.invoiceNumber})`)
+      .where(sql`invoice_number IS NOT NULL`),
     // Invoice page query indexes
     index("invoices_team_due_date_idx")
       .on(table.teamId, table.dueDate.desc())

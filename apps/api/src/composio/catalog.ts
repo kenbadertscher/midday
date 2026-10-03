@@ -4,7 +4,7 @@ import {
   connectorApps,
   toComposioSlug,
 } from "@midday/connectors";
-import { composioFetch } from "./client";
+import { composioFetch, isComposioConfigured } from "./client";
 
 export type CatalogEntry = {
   slug: string;
@@ -17,11 +17,11 @@ const CACHE_KEY = "catalog";
 const CACHE_TTL = 86400; // 24h
 
 async function fetchCatalog(): Promise<CatalogEntry[]> {
-  const apiKey = process.env.COMPOSIO_API_KEY;
-
   const composioMeta = new Map<string, { logo: string; description: string }>();
 
-  if (apiKey) {
+  // A truthy-but-placeholder key used to pass this check and fire one outbound
+  // request per curated toolkit. The catalog renders fine without the metadata.
+  if (isComposioConfigured()) {
     const results = await Promise.allSettled(
       CURATED_TOOLKIT_SLUGS.map(async (slug) => {
         const data = await composioFetch<{

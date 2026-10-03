@@ -59,6 +59,58 @@ const logger = createLoggerWithContext("trpc:invoice");
 // Use the shared default template from @midday/invoice
 const defaultTemplate = DEFAULT_TEMPLATE;
 
+const INVOICE_NUMBER_UNIQUE_IDX = "invoices_team_invoice_number_unique_idx";
+
+/**
+ * Postgres raises 23505 if two saves race past the availability check below and
+ * both reach the unique index. Surface that as the same CONFLICT the check
+ * produces, rather than letting a driver error escape as a 500.
+ */
+function rethrowInvoiceNumberConflict(error: unknown): never {
+  const pgError = error as { code?: string; constraint?: string } & {
+    cause?: { code?: string; constraint?: string };
+  };
+  const code = pgError?.code ?? pgError?.cause?.code;
+  const constraint = pgError?.constraint ?? pgError?.cause?.constraint;
+
+  if (code === "23505" && constraint === INVOICE_NUMBER_UNIQUE_IDX) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Invoice number is already in use",
+    });
+  }
+
+  throw error;
+}
+
+/**
+ * Invoice numbers are user-editable, so the API — not just the form — is
+ * responsible for keeping them unique within a team. Backed by a partial unique
+ * index on (team_id, lower(invoice_number)); this check exists so the common
+ * case returns a clear error instead of a constraint violation.
+ */
+async function assertInvoiceNumberAvailable(
+  db: Parameters<typeof searchInvoiceNumber>[0],
+  {
+    teamId,
+    invoiceNumber,
+    excludeId,
+  }: { teamId: string; invoiceNumber: string; excludeId?: string },
+) {
+  const existing = await searchInvoiceNumber(db, {
+    teamId,
+    query: invoiceNumber,
+    excludeId,
+  });
+
+  if (existing) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: `Invoice number ${invoiceNumber} is already in use`,
+    });
+  }
+}
+
 export const invoiceRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getInvoicesSchema.optional())
@@ -111,6 +163,7 @@ export const invoiceRouter = createTRPCRouter({
       return searchInvoiceNumber(db, {
         teamId: teamId!,
         query: input.query,
+        excludeId: input.excludeId,
       });
     }),
 
@@ -129,10 +182,16 @@ export const invoiceRouter = createTRPCRouter({
         projectId: z.string().uuid(),
         dateFrom: z.string(),
         dateTo: z.string(),
+        /**
+         * "summary"  — one line for the whole range (the original behaviour).
+         * "itemized" — one line per tracked entry, described by the entry's
+         *              own note rather than the project name.
+         */
+        lineItemMode: z.enum(["summary", "itemized"]).default("summary"),
       }),
     )
     .mutation(async ({ ctx: { db, teamId, session }, input }) => {
-      const { projectId, dateFrom, dateTo } = input;
+      const { projectId, dateFrom, dateTo, lineItemMode } = input;
 
       // Get project data and tracker entries
       const [projectData, trackerData] = await Promise.all([
@@ -200,7 +259,6 @@ export const invoiceRouter = createTRPCRouter({
 
       const invoiceId = uuidv4();
       const currency = projectData.currency || team?.baseCurrency || "USD";
-      const amount = totalHours * Number(projectData.rate);
 
       // Get user's preferred date format
       const userDateFormat =
@@ -211,6 +269,61 @@ export const invoiceRouter = createTRPCRouter({
       const formattedDateFrom = format(parseISO(dateFrom), userDateFormat);
       const formattedDateTo = format(parseISO(dateTo), userDateFormat);
       const dateRangeDescription = `${projectData.name} (${formattedDateFrom} - ${formattedDateTo})`;
+
+      const rate = Number(projectData.rate);
+
+      // Round the same way the summary total is, so the itemized lines and the
+      // single-line total stay comparable.
+      const toHours = (duration: number | null) =>
+        Math.round(((duration || 0) / 3600) * 100) / 100;
+
+      const lineItems =
+        lineItemMode === "itemized"
+          ? allEntries
+              // Oldest first — a bill reads chronologically.
+              .slice()
+              .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
+              .map((entry) => {
+                const entryDate = entry.date
+                  ? format(parseISO(entry.date), userDateFormat)
+                  : null;
+
+                // The entry's own note is the description. Entries are often
+                // logged without one, so fall back to something identifiable
+                // rather than emitting a blank line on the invoice.
+                const note = entry.description?.trim();
+
+                return {
+                  name:
+                    note && entryDate
+                      ? `${entryDate} — ${note}`
+                      : (note ??
+                        (entryDate
+                          ? `${projectData.name} (${entryDate})`
+                          : projectData.name)),
+                  quantity: toHours(entry.duration),
+                  price: rate,
+                  vat: 0,
+                };
+              })
+              // A zero-hour entry would bill nothing and just add noise.
+              .filter((item) => item.quantity > 0)
+          : [
+              {
+                name: dateRangeDescription,
+                quantity: totalHours,
+                price: rate,
+                vat: 0,
+              },
+            ];
+
+      // Derive the total from the lines actually on the invoice. Rounding each
+      // entry to 2dp can drift from rounding the summed duration once, and the
+      // header total must agree with what the customer can add up.
+      const amount = lineItems.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0,
+      );
 
       // Create draft invoice with tracker data
       const templateData = {
@@ -245,14 +358,7 @@ export const invoiceRouter = createTRPCRouter({
         invoiceNumber: nextInvoiceNumber,
         currency: currency.toUpperCase(),
         amount,
-        lineItems: [
-          {
-            name: dateRangeDescription,
-            quantity: totalHours,
-            price: Number(projectData.rate),
-            vat: 0,
-          },
-        ],
+        lineItems,
         issueDate: new Date().toISOString(),
         dueDate: addDays(
           new Date(),
@@ -273,7 +379,7 @@ export const invoiceRouter = createTRPCRouter({
         subtotal: null,
       };
 
-      return draftInvoice(db, invoiceData);
+      return draftInvoice(db, invoiceData).catch(rethrowInvoiceNumberConflict);
     }),
 
   defaultSettings: protectedProcedure.query(
@@ -433,6 +539,14 @@ export const invoiceRouter = createTRPCRouter({
       const invoiceNumber =
         input.invoiceNumber || (await getNextInvoiceNumber(db, teamId!));
 
+      // The number is user-editable, so uniqueness is enforced here rather
+      // than only in the form — excluding this invoice's own row.
+      await assertInvoiceNumberAvailable(db, {
+        teamId: teamId!,
+        invoiceNumber,
+        excludeId: input.id,
+      });
+
       return draftInvoice(db, {
         ...input,
         invoiceNumber,
@@ -442,7 +556,7 @@ export const invoiceRouter = createTRPCRouter({
         fromDetails: parseInputValue(input.fromDetails),
         customerDetails: parseInputValue(input.customerDetails),
         noteDetails: parseInputValue(input.noteDetails),
-      });
+      }).catch(rethrowInvoiceNumberConflict);
     }),
 
   create: protectedProcedure

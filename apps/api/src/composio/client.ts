@@ -12,7 +12,22 @@ export const composio = new Composio({
 
 const COMPOSIO_API_BASE = "https://backend.composio.dev/api/v3";
 
+// apps/api/.env ships COMPOSIO_API_KEY=unused-local so t3-env is satisfied, but
+// the placeholder still reached backend.composio.dev on every dashboard load —
+// an outbound call carrying the user id, and a 401 five times per page. Treat a
+// missing or unused-* key as "connectors disabled" and never leave the network.
+export function isComposioConfigured(): boolean {
+  const key = process.env.COMPOSIO_API_KEY;
+  return !!key && !key.startsWith("unused");
+}
+
 export async function composioFetch<T>(path: string): Promise<T> {
+  if (!isComposioConfigured()) {
+    throw new Error(
+      "Composio is not configured (COMPOSIO_API_KEY is unset or a placeholder)",
+    );
+  }
+
   const res = await fetch(`${COMPOSIO_API_BASE}${path}`, {
     headers: { "x-api-key": process.env.COMPOSIO_API_KEY! },
   });
@@ -49,6 +64,11 @@ function asToolkitItems(items: unknown[]): ToolkitItem[] {
 const TOOLKIT_CACHE_TTL = 120; // 2 min in seconds
 
 export async function getUserToolkits(userId: string): Promise<ToolkitItem[]> {
+  // No key: report "nothing connected" rather than throwing on every load.
+  if (!isComposioConfigured()) {
+    return [];
+  }
+
   return connectorsCache.getOrSet<ToolkitItem[]>(
     `toolkits:${userId}`,
     TOOLKIT_CACHE_TTL,
