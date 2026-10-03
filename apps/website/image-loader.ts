@@ -4,7 +4,9 @@ interface ImageLoaderParams {
   quality?: number;
 }
 
-const CDN_URL = "https://midday.ai";
+// Upstream hardcoded "https://midday.ai" — Midday's Cloudflare image proxy.
+// Set NEXT_PUBLIC_CDN_URL to your own; unset means no proxy (direct origin).
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/$/, "");
 
 export default function imageLoader({
   src,
@@ -32,6 +34,11 @@ export default function imageLoader({
     if (src.startsWith("/")) {
       return `https://${vercelUrl}${src}`;
     }
+    return src;
+  }
+
+  // No proxy configured — serve directly from origin.
+  if (!CDN_URL) {
     return src;
   }
 

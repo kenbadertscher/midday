@@ -14,7 +14,7 @@ import { rateLimiter } from "hono-rate-limiter";
 
 const app = new OpenAPIHono<Context>();
 
-const apiUrl = process.env.MIDDAY_API_URL || "https://api.midday.ai";
+const apiUrl = process.env.MIDDAY_API_URL || "http://localhost:3002";
 
 const mcpRateLimitEnv = process.env.MCP_API_RATE_LIMIT;
 const parsedMcpLimit =

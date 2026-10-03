@@ -1,5 +1,6 @@
 "use client";
 
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import {
   Select,
@@ -9,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";

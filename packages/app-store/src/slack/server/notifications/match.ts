@@ -4,6 +4,11 @@ import { createLoggerWithContext } from "@midday/logger";
 import { format, parseISO } from "date-fns";
 import { createSlackWebClient, ensureBotInChannel } from "../client";
 
+// Upstream hardcoded https://app.midday.ai in these Slack links, which sent
+// users to Midday's hosted dashboard instead of this deployment.
+const DASHBOARD_BASE_URL =
+  process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
+
 const logger = createLoggerWithContext("slack:match-notification");
 
 export type MatchNotificationParams = {
@@ -128,7 +133,7 @@ export async function sendSlackMatchNotification({
                   text: "View transaction",
                   emoji: false,
                 },
-                url: `https://app.midday.ai/transactions?id=${encodeURIComponent(transactionId)}`,
+                url: `${DASHBOARD_BASE_URL}/transactions?id=${encodeURIComponent(transactionId)}`,
                 action_id: "view_transaction",
               },
             ],
@@ -199,7 +204,7 @@ export async function sendSlackMatchNotification({
                   text: "View in Midday",
                   emoji: false,
                 },
-                url: `https://app.midday.ai/inbox?inboxId=${encodeURIComponent(inboxId)}`,
+                url: `${DASHBOARD_BASE_URL}/inbox?inboxId=${encodeURIComponent(inboxId)}`,
                 action_id: "view_inbox",
               },
             ],

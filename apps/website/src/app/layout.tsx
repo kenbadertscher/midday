@@ -1,7 +1,6 @@
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
-import { Provider as Analytics } from "@midday/events/client";
 import type { Metadata } from "next";
 import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -117,8 +116,12 @@ export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://cdn.midday.ai" />
-        <link rel="dns-prefetch" href="https://cdn.midday.ai" />
+        {/*
+          Upstream preconnected + dns-prefetched https://cdn.midday.ai here.
+          A preconnect opens a real TCP+TLS connection to Midday's CDN on every
+          page load whether or not any asset from it is used, so both hints are
+          removed rather than repointed.
+        */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -145,7 +148,6 @@ export default function Layout({ children }: { children: ReactElement }) {
               {children}
             </main>
             <Footer />
-            <Analytics />
           </ThemeProvider>
         </NuqsAdapter>
       </body>

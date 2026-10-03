@@ -453,10 +453,10 @@ export default function TermsPage() {
                   </p>
                   <p className="text-foreground leading-relaxed">
                     <a
-                      href="mailto:support@midday.ai"
+                      href="mailto:ken@kenb.dev"
                       className="text-foreground hover:text-muted-foreground transition-colors"
                     >
-                      support@midday.ai
+                      ken@kenb.dev
                     </a>
                   </p>
                 </section>

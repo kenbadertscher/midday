@@ -1,5 +1,6 @@
 "use client";
 
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import {
   Dialog,
@@ -9,7 +10,6 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTokenModalStore } from "@/store/token-modal";
 import { useTRPC } from "@/trpc/client";

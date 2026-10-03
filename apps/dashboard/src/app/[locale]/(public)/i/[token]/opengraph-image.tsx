@@ -3,6 +3,15 @@ import { ImageResponse } from "next/og";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { getWebsiteLogo } from "@/utils/logos";
 
+// Upstream fetched these fonts from https://cdn.midday.ai at render time, so
+// generating an OG image reached out to Midday's CDN. Host them yourself and set
+// CDN_URL (or NEXT_PUBLIC_CDN_URL) to your own origin.
+const FONT_CDN_URL = (
+  process.env.CDN_URL ||
+  process.env.NEXT_PUBLIC_CDN_URL ||
+  ""
+).replace(/\/$/, "");
+
 export const contentType = "image/png";
 
 type Props = {
@@ -24,7 +33,7 @@ export default async function Image({ params }: Props) {
   }
 
   const hedvigSansFont = fetch(
-    "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
+    `${FONT_CDN_URL}/fonts/HedvigSans/HedvigLettersSans-Regular.ttf`,
   ).then((res) => res.arrayBuffer());
 
   const logoUrl = getWebsiteLogo(invoice.customer?.website);

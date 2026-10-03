@@ -1,5 +1,6 @@
 "use client";
 
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -10,7 +11,6 @@ import {
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import NumberFlow from "@number-flow/react";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef } from "react";
 import { useGlobalTimerStatus } from "@/hooks/use-global-timer-status";

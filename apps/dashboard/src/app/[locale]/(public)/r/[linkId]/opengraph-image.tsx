@@ -5,6 +5,15 @@ import { ImageResponse } from "next/og";
 import { getChartDisplayName } from "@/components/metrics/utils/chart-types";
 import { getQueryClient, trpc } from "@/trpc/server";
 
+// Upstream fetched these fonts from https://cdn.midday.ai at render time, so
+// generating an OG image reached out to Midday's CDN. Host them yourself and set
+// CDN_URL (or NEXT_PUBLIC_CDN_URL) to your own origin.
+const FONT_CDN_URL = (
+  process.env.CDN_URL ||
+  process.env.NEXT_PUBLIC_CDN_URL ||
+  ""
+).replace(/\/$/, "");
+
 export const contentType = "image/png";
 
 // Cache the OG image for 1 hour (3600 seconds)
@@ -33,11 +42,11 @@ export default async function Image({ params }: Props) {
   }
 
   const hedvigSerifFont = fetch(
-    "https://cdn.midday.ai/fonts/HedvigSerif/HedvigLettersSerif-Regular.ttf?c=1",
+    `${FONT_CDN_URL}/fonts/HedvigSerif/HedvigLettersSerif-Regular.ttf?c=1`,
   ).then((res) => res.arrayBuffer());
 
   const hedvigSansFont = fetch(
-    "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
+    `${FONT_CDN_URL}/fonts/HedvigSans/HedvigLettersSans-Regular.ttf`,
   ).then((res) => res.arrayBuffer());
 
   const chartName = getChartDisplayName(report.type as any);

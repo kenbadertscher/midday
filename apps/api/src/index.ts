@@ -171,8 +171,10 @@ const openAPIConfig = {
   },
   servers: [
     {
-      url: "https://api.midday.ai",
-      description: "Production API",
+      // Was hardcoded to https://api.midday.ai — this is the URL the generated
+      // OpenAPI docs (and any client generated from them) point at.
+      url: process.env.MIDDAY_API_URL || "http://localhost:3002",
+      description: "API",
     },
   ],
   security: [
@@ -282,8 +284,8 @@ app.openAPIRegistry.registerComponent("securitySchemes", "token", {
 });
 
 const dashboardUrl =
-  process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
-const apiUrl = process.env.MIDDAY_API_URL || "https://api.midday.ai";
+  process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
+const apiUrl = process.env.MIDDAY_API_URL || "http://localhost:3002";
 
 app.openAPIRegistry.registerComponent("securitySchemes", "oauth2", {
   type: "oauth2",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
@@ -14,7 +15,6 @@ import { Icons } from "@midday/ui/icons";
 import { SubmitButtonMorph } from "@midday/ui/submit-button-morph";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useRef, useState } from "react";

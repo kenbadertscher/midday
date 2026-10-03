@@ -18,12 +18,12 @@ import {
   desc,
   eq,
   gte,
-  ilike,
   inArray,
   isNotNull,
   isNull,
   lt,
   lte,
+  ne,
   or,
   sql,
 } from "drizzle-orm";
@@ -606,23 +606,40 @@ export async function getPaymentStatus(
 type SearchInvoiceNumberParams = {
   teamId: string;
   query: string;
+  /**
+   * Invoice to ignore when checking. Required when editing an existing
+   * invoice — without it the invoice always matches its own number and every
+   * edit looks like a duplicate.
+   */
+  excludeId?: string;
 };
 
+/**
+ * Find an invoice in the team already using this number.
+ *
+ * Matching is **exact** (case-insensitive). It was previously a suffix match
+ * (`ilike '%query'`), which reported a conflict for any number ending in what
+ * you typed — entering "1" collided with "INV-0001".
+ */
 export async function searchInvoiceNumber(
   db: Database,
   params: SearchInvoiceNumberParams,
 ) {
+  const conditions = [
+    eq(invoices.teamId, params.teamId),
+    sql`lower(${invoices.invoiceNumber}) = lower(${params.query})`,
+  ];
+
+  if (params.excludeId) {
+    conditions.push(ne(invoices.id, params.excludeId));
+  }
+
   const [result] = await db
     .select({
       invoiceNumber: invoices.invoiceNumber,
     })
     .from(invoices)
-    .where(
-      and(
-        eq(invoices.teamId, params.teamId),
-        ilike(invoices.invoiceNumber, `%${params.query}`),
-      ),
-    )
+    .where(and(...conditions))
     .limit(1);
 
   return result ?? null;

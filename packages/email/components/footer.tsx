@@ -33,7 +33,7 @@ export function Footer() {
 
       <Row>
         <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/lS72Toq">
+          <Link href={baseUrl}>
             <Img
               src={`${baseUrl}/email/x.png`}
               width="18"
@@ -43,7 +43,7 @@ export function Footer() {
           </Link>
         </Column>
         <Column className="align-middle">
-          <Link href="https://go.midday.ai/Ct3xybK">
+          <Link href={baseUrl}>
             <Img
               src={`${baseUrl}/email/linkedin.png`}
               width="22"
@@ -77,7 +77,7 @@ export function Footer() {
         </Link>
         {" · "}
         <Link
-          href="https://go.midday.ai/ZrhEMbR"
+          href={baseUrl}
           className={themeClasses.mutedLink}
           style={{ color: lightStyles.mutedText.color }}
         >

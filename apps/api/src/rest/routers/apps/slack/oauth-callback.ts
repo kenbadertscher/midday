@@ -258,7 +258,7 @@ app.openapi(
 
       // Build redirect URL to dashboard
       const dashboardUrl =
-        process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+        process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
 
       return c.redirect(`${dashboardUrl}/oauth-callback?status=success`, 302);
     } catch (err) {

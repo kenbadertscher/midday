@@ -1,5 +1,6 @@
 "use client";
 
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { createClient } from "@midday/supabase/client";
 import {
@@ -23,7 +24,6 @@ import {
 } from "@midday/ui/card";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";

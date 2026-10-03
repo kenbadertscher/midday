@@ -1,6 +1,7 @@
 "use client";
 
 import { TZDate } from "@date-fns/tz";
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Calendar } from "@midday/ui/calendar";
 import {
@@ -19,7 +20,6 @@ import {
 } from "@midday/ui/select";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   endOfMonth,
@@ -106,6 +106,9 @@ export function TrackerCreateInvoice({ projectId }: Props) {
   const [date, setDate] = useState<DateRange | undefined>(
     defaultPresetOption?.dateRange,
   );
+  const [lineItemMode, setLineItemMode] = useState<"summary" | "itemized">(
+    "summary",
+  );
 
   const createInvoiceFromTrackerMutation = useMutation(
     trpc.invoice.createFromTracker.mutationOptions({
@@ -183,6 +186,7 @@ export function TrackerCreateInvoice({ projectId }: Props) {
       projectId,
       dateFrom: formatISO(date.from, { representation: "date" }),
       dateTo: formatISO(date.to, { representation: "date" }),
+      lineItemMode,
     });
   };
 
@@ -203,6 +207,25 @@ export function TrackerCreateInvoice({ projectId }: Props) {
                       {preset.label}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={lineItemMode}
+                onValueChange={(value) =>
+                  setLineItemMode(value as "summary" | "itemized")
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Line items" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="summary">
+                    Total hours as one line
+                  </SelectItem>
+                  <SelectItem value="itemized">
+                    One line per time entry
+                  </SelectItem>
                 </SelectContent>
               </Select>
 

@@ -3,6 +3,11 @@ import { getTeamById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import type { WebClient } from "@slack/web-api";
 
+// Upstream hardcoded https://app.midday.ai in these Slack links, which sent
+// users to Midday's hosted dashboard instead of this deployment.
+const DASHBOARD_BASE_URL =
+  process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
+
 export async function publishAppHome({
   client,
   userId,
@@ -78,7 +83,7 @@ export async function publishAppHome({
             text: "Settings",
             emoji: false,
           },
-          url: "https://app.midday.ai/apps?app=slack&settings=true",
+          url: `${DASHBOARD_BASE_URL}/apps?app=slack&settings=true`,
           action_id: "open_settings",
         },
       },
@@ -137,7 +142,7 @@ export async function publishAppHome({
               text: "Open Midday",
               emoji: false,
             },
-            url: "https://app.midday.ai",
+            url: DASHBOARD_BASE_URL,
             action_id: "open_midday",
           },
           {
@@ -147,7 +152,7 @@ export async function publishAppHome({
               text: "Settings",
               emoji: false,
             },
-            url: "https://app.midday.ai/apps?app=slack&settings=true",
+            url: `${DASHBOARD_BASE_URL}/apps?app=slack&settings=true`,
             action_id: "view_settings",
           },
         ],

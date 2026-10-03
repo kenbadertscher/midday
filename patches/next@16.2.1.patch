@@ -1,0 +1,93 @@
+diff --git a/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.development.js b/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.development.js
+index c3188d934a0eeeeee39284b33ab3b610154786ac..efe2614cc45409bd84cc0ad666440d09cf399eb1 100644
+--- a/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.development.js
++++ b/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.development.js
+@@ -3845,7 +3845,7 @@
+                         );
+                       performance.measure(measureName, {
+                         start: 0 > startTime$jscomp$2 ? 0 : startTime$jscomp$2,
+-                        end: childrenEndTime$jscomp$1,
++                        end: 0 > childrenEndTime$jscomp$1 ? 0 : childrenEndTime$jscomp$1,
+                         detail: {
+                           devtools: {
+                             color: "error",
+@@ -3918,7 +3918,7 @@
+                             {
+                               start:
+                                 0 > startTime$jscomp$3 ? 0 : startTime$jscomp$3,
+-                              end: childrenEndTime$jscomp$2,
++                              end: 0 > childrenEndTime$jscomp$2 ? 0 : childrenEndTime$jscomp$2,
+                               detail: {
+                                 devtools: {
+                                   color: color$jscomp$0,
+@@ -4103,7 +4103,7 @@
+                       );
+                     performance.measure(measureName$jscomp$1, {
+                       start: 0 > startTime$jscomp$5 ? 0 : startTime$jscomp$5,
+-                      end: childrenEndTime$jscomp$3,
++                      end: 0 > childrenEndTime$jscomp$3 ? 0 : childrenEndTime$jscomp$3,
+                       detail: {
+                         devtools: {
+                           color: "warning",
+diff --git a/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.edge.development.js b/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.edge.development.js
+index 6d5664896747731cf89362b924f120f7d1a3f363..f0ddeacf0f03aff8fb7648ebaa8dacc270f1da98 100644
+--- a/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.edge.development.js
++++ b/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.edge.development.js
+@@ -3989,7 +3989,7 @@
+                         );
+                       performance.measure(measureName, {
+                         start: 0 > startTime$jscomp$2 ? 0 : startTime$jscomp$2,
+-                        end: childrenEndTime$jscomp$1,
++                        end: 0 > childrenEndTime$jscomp$1 ? 0 : childrenEndTime$jscomp$1,
+                         detail: {
+                           devtools: {
+                             color: "error",
+@@ -4062,7 +4062,7 @@
+                             {
+                               start:
+                                 0 > startTime$jscomp$3 ? 0 : startTime$jscomp$3,
+-                              end: childrenEndTime$jscomp$2,
++                              end: 0 > childrenEndTime$jscomp$2 ? 0 : childrenEndTime$jscomp$2,
+                               detail: {
+                                 devtools: {
+                                   color: color$jscomp$0,
+@@ -4247,7 +4247,7 @@
+                       );
+                     performance.measure(measureName$jscomp$1, {
+                       start: 0 > startTime$jscomp$5 ? 0 : startTime$jscomp$5,
+-                      end: childrenEndTime$jscomp$3,
++                      end: 0 > childrenEndTime$jscomp$3 ? 0 : childrenEndTime$jscomp$3,
+                       detail: {
+                         devtools: {
+                           color: "warning",
+diff --git a/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.node.development.js b/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.node.development.js
+index 291101b2dd0e3637f51bd4e26ce1517c6620a859..efc172da26054758cafc5ab2909575b38f37c0c6 100644
+--- a/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.node.development.js
++++ b/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.node.development.js
+@@ -4047,7 +4047,7 @@
+                         );
+                       performance.measure(measureName, {
+                         start: 0 > startTime$jscomp$2 ? 0 : startTime$jscomp$2,
+-                        end: childrenEndTime$jscomp$1,
++                        end: 0 > childrenEndTime$jscomp$1 ? 0 : childrenEndTime$jscomp$1,
+                         detail: {
+                           devtools: {
+                             color: "error",
+@@ -4120,7 +4120,7 @@
+                             {
+                               start:
+                                 0 > startTime$jscomp$3 ? 0 : startTime$jscomp$3,
+-                              end: childrenEndTime$jscomp$2,
++                              end: 0 > childrenEndTime$jscomp$2 ? 0 : childrenEndTime$jscomp$2,
+                               detail: {
+                                 devtools: {
+                                   color: color$jscomp$0,
+@@ -4305,7 +4305,7 @@
+                       );
+                     performance.measure(measureName$jscomp$1, {
+                       start: 0 > startTime$jscomp$5 ? 0 : startTime$jscomp$5,
+-                      end: childrenEndTime$jscomp$3,
++                      end: 0 > childrenEndTime$jscomp$3 ? 0 : childrenEndTime$jscomp$3,
+                       detail: {
+                         devtools: {
+                           color: "warning",

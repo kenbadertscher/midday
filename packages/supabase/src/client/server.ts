@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "../types";
+import { AUTH_COOKIE_NAME } from "./cookie-name";
 
 type CreateClientOptions = {
   admin?: boolean;
@@ -28,6 +29,7 @@ export async function createClient(options?: CreateClientOptions) {
     key,
     {
       ...rest,
+      cookieOptions: { name: AUTH_COOKIE_NAME },
       cookies: {
         getAll() {
           return cookieStore.getAll();

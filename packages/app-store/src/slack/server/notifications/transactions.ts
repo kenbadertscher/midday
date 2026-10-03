@@ -3,6 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { createSlackWebClient, ensureBotInChannel } from "../client";
 
+// Upstream hardcoded https://app.midday.ai in these Slack links, which sent
+// users to Midday's hosted dashboard instead of this deployment.
+const DASHBOARD_BASE_URL =
+  process.env.MIDDAY_DASHBOARD_URL || "http://localhost:3001";
+
 const transactionSchema = z.object({
   amount: z.string(),
   name: z.string(),
@@ -79,7 +84,7 @@ export async function sendSlackTransactionNotifications({
                 type: "plain_text",
                 text: "View transactions",
               },
-              url: "https://app.midday.ai/transactions",
+              url: `${DASHBOARD_BASE_URL}/transactions`,
               action_id: "button_click",
             },
           ],

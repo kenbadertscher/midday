@@ -1,6 +1,7 @@
 "use client";
 
 import { utc } from "@date-fns/utc";
+import { useOpenPanel } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
@@ -29,7 +30,6 @@ import { Select } from "@midday/ui/select";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
-import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO } from "date-fns";
 import { nanoid } from "nanoid";

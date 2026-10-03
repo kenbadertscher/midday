@@ -1,5 +1,10 @@
 /** @type {import("next").NextConfig} */
 const config = {
+  // See apps/dashboard/next.config.ts — required for LAN access in dev.
+  allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
   poweredByHeader: false,
   reactStrictMode: true,
   trailingSlash: true,

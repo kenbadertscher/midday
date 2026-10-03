@@ -34,7 +34,10 @@ export function shouldShowUI(flags: {
 }
 
 export function getApiUrl(): string {
-  return process.env.MIDDAY_API_URL || "https://api.midday.ai";
+  // Was hardcoded to https://api.midday.ai, so an unconfigured CLI would
+  // authenticate against Midday's hosted API. Points at a local instance now —
+  // set MIDDAY_API_URL to target your own deployment.
+  return process.env.MIDDAY_API_URL || "http://localhost:3002";
 }
 
 export function getDashboardUrl(): string {

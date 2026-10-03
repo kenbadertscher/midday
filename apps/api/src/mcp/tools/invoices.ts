@@ -59,8 +59,16 @@ import {
   withErrorHandling,
 } from "../utils";
 
+// SSRF guard for the logo fetch below. Upstream hardcoded Midday's own storage
+// host ("https://service.midday.ai/"); self-hosted instances serve logos from
+// their own Supabase storage, so the allowlist follows SUPABASE_URL instead.
+// If SUPABASE_URL is unset nothing is allowed — embedLogoAsDataUrl then skips
+// the fetch and leaves the invoice untouched, which is the safe default.
 function isAllowedLogoUrl(url: string): boolean {
-  return url.startsWith("https://service.midday.ai/");
+  const storageOrigin = process.env.SUPABASE_URL;
+  if (!storageOrigin) return false;
+
+  return url.startsWith(`${storageOrigin.replace(/\/$/, "")}/`);
 }
 
 async function embedLogoAsDataUrl(
